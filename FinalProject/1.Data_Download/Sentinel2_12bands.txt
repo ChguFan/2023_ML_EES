@@ -1,0 +1,71 @@
+var table = ee.FeatureCollection("projects/ee-fanxavier484/assets/dongbeilunkuo");
+// This table is your ROI imported in GEE Assets
+var roi = table; 
+
+// Load the boundary of the ROI in the center of the map, displayed in yellow
+Map.centerObject(roi, 10);
+Map.addLayer(roi, {'color': 'yellow'}, 'ROI');
+
+/**
+ * Function to mask clouds using the Sentinel-2 QA band
+ * @param {ee.Image} image Sentinel-2 image
+ * @return {ee.Image} cloud masked Sentinel-2 image
+ */
+function maskS2clouds(image) {
+  var qa = image.select('QA60');
+
+  // Bits 10 and 11 are clouds and cirrus, respectively.
+  var cloudBitMask = 1 << 10;
+  var cirrusBitMask = 1 << 11;
+
+  // Both flags should be set to zero, indicating clear conditions.
+  var mask = qa.bitwiseAnd(cloudBitMask).eq(0)
+      .and(qa.bitwiseAnd(cirrusBitMask).eq(0));
+
+  return image.updateMask(mask).divide(10000);
+}
+
+// Median composite
+var dataset = ee.ImageCollection('COPERNICUS/S2_SR_HARMONIZED')
+                  .filterDate('2022-04-01', '2022-09-30')
+                  .filterBounds(roi)
+                  // Pre-filter to get less cloudy granules.
+                  .filter(ee.Filter.lt('CLOUDY_PIXEL_PERCENTAGE',20))
+                //  .filterMetadata('MGRS_TILE', 'equals', '51UYQ')
+                  .map(maskS2clouds)
+                  .median()            //.mean()
+                  .clip(roi);
+                 // .select('B4', 'B3', 'B2');
+print(dataset);
+
+var visualization = {
+  min: 0.0,
+  max: 0.3,
+  bands: ['B4', 'B3', 'B2'],
+};
+Map.addLayer(dataset, visualization, 'RGB');
+
+// Select the bands here. I downloaded the bands one by one.
+var exportimage = dataset.select(['B1','B2','B3','B4','B5','B6','B7','B8','B8A','B9','B11','B12']); 
+print(exportimage);
+
+// Resample to 10m
+var dataset_resampled = exportimage.reproject({
+  crs: dataset.projection().crs(),
+  scale: 10,
+  });
+print('Pixel size in meters:', dataset_resampled.projection().nominalScale().getInfo())
+
+
+
+//Export the data into Google Drive
+Export.image.toDrive({
+  image: dataset_resampled,              
+  description: "dongbeidownload", 
+  folder: 'download_dongbei',         
+  scale: 10,                      
+  crs: "EPSG:3857",              
+  region: roi,                     
+  maxPixels: 1e13,                
+  fileFormat: 'GeoTIFF'         
+});

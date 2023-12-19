@@ -1,0 +1,156 @@
+var table = ee.FeatureCollection("projects/ee-fanxavier484/assets/dongbeilunkuo"),
+    image = ee.Image("projects/ee-fanxavier484/assets/50S_20220101-20230101"),
+    image2 = ee.Image("projects/ee-fanxavier484/assets/50T_20220101-20230101"),
+    image3 = ee.Image("projects/ee-fanxavier484/assets/50U_20220101-20230101"),
+    image4 = ee.Image("projects/ee-fanxavier484/assets/51S_20220101-20230101"),
+    image5 = ee.Image("projects/ee-fanxavier484/assets/51T_20220101-20230101"),
+    image6 = ee.Image("projects/ee-fanxavier484/assets/51U_20220101-20230101"),
+    image7 = ee.Image("projects/ee-fanxavier484/assets/52T_20220101-20230101"),
+    image8 = ee.Image("projects/ee-fanxavier484/assets/52U_20220101-20230101"),
+    image9 = ee.Image("projects/ee-fanxavier484/assets/53T_20220101-20230101"),
+    image10 = ee.Image("projects/ee-fanxavier484/assets/53U_20220101-20230101");
+    
+// The images are LULC tifs. The table is ROI.
+
+var roi = table; 
+
+Map.centerObject(roi, 10);
+Map.addLayer(roi, {'color': 'yellow'}, 'ROI');
+
+/**
+ * Function to mask clouds using the Sentinel-2 QA band
+ * @param {ee.Image} image Sentinel-2 image
+ * @return {ee.Image} cloud masked Sentinel-2 image
+ */
+function maskS2clouds(image) {
+  var qa = image.select('QA60');
+
+  // Bits 10 and 11 are clouds and cirrus, respectively.
+  var cloudBitMask = 1 << 10;
+  var cirrusBitMask = 1 << 11;
+
+  // Both flags should be set to zero, indicating clear conditions.
+  var mask = qa.bitwiseAnd(cloudBitMask).eq(0)
+      .and(qa.bitwiseAnd(cirrusBitMask).eq(0));
+
+  return image.updateMask(mask).divide(10000);
+}
+
+var dataset = ee.ImageCollection('COPERNICUS/S2_SR_HARMONIZED')
+                  .filterDate('2022-04-01', '2022-09-30')
+                  .filterBounds(roi)
+                  // Pre-filter to get less cloudy granules.
+                  .filter(ee.Filter.lt('CLOUDY_PIXEL_PERCENTAGE',20))
+                //  .filterMetadata('MGRS_TILE', 'equals', '51UYQ') 
+                  .map(maskS2clouds)
+                  .median()            //.mean()
+                  .clip(roi);
+                 // .select('B4', 'B3', 'B2');
+print(dataset);
+var visualization = {
+  min: 0.0,
+  max: 0.3,
+  bands: ['B4', 'B3', 'B2'],
+};
+Map.addLayer(dataset, visualization, 'RGB');
+
+
+var exportimage = dataset.select(['B1','B2','B3','B4','B5','B6','B7','B8','B8A','B9','B11','B12']); 
+print(exportimage);
+
+// Resample to 10m
+var dataset_resampled = exportimage.reproject({
+  crs: dataset.projection().crs(),
+  scale: 10,
+  });
+print('Pixel size in meters:', dataset_resampled.projection().nominalScale().getInfo())
+
+// Get lat, lon
+var lonLat = ee.Image.pixelLonLat().toFloat();
+
+// Add lat, lon as bands in each pixel
+var imageWithLonLat = dataset_resampled.addBands(lonLat);
+
+var finalimage = imageWithLonLat.select(['latitude','longitude','B1','B2','B3','B4','B5','B6','B7','B8','B8A','B9','B11','B12'])
+print(finalimage);
+
+// Mask the non-forested pixels
+var alignedLandCover = image.reproject({
+  crs: dataset.projection().crs(),
+  scale: 10,
+});
+var mask1 = alignedLandCover.eq(2);
+
+var alignedLandCover2 = image2.reproject({
+  crs: dataset.projection().crs(),
+  scale: 10,
+});
+var mask2 = alignedLandCover2.eq(2);
+
+var alignedLandCover3 = image3.reproject({
+  crs: dataset.projection().crs(),
+  scale: 10,
+});
+var mask3 = alignedLandCover3.eq(2);
+
+var alignedLandCover4 = image4.reproject({
+  crs: dataset.projection().crs(),
+  scale: 10,
+});
+var mask4 = alignedLandCover4.eq(2);
+
+var alignedLandCover5 = image5.reproject({
+  crs: dataset.projection().crs(),
+  scale: 10,
+});
+var mask5 = alignedLandCover5.eq(2);
+
+var alignedLandCover6 = image6.reproject({
+  crs: dataset.projection().crs(),
+  scale: 10,
+});
+var mask6 = alignedLandCover6.eq(2);
+
+var alignedLandCover7 = image7.reproject({
+  crs: dataset.projection().crs(),
+  scale: 10,
+});
+var mask7 = alignedLandCover7.eq(2);
+
+var alignedLandCover8 = image8.reproject({
+  crs: dataset.projection().crs(),
+  scale: 10,
+});
+var mask8 = alignedLandCover8.eq(2);
+
+var alignedLandCover9 = image9.reproject({
+  crs: dataset.projection().crs(),
+  scale: 10,
+});
+var mask9 = alignedLandCover9.eq(2);
+
+var alignedLandCover10 = image10.reproject({
+  crs: dataset.projection().crs(),
+  scale: 10,
+});
+var mask10 = alignedLandCover10.eq(2);
+
+// Create ImageCollection
+var collection = ee.ImageCollection([alignedLandCover, alignedLandCover2, alignedLandCover3, alignedLandCover4, alignedLandCover5, alignedLandCover6, alignedLandCover7, alignedLandCover8, alignedLandCover9, alignedLandCover10]);
+
+// Merge images through mosaic 
+var mergedImage = collection.mosaic();
+var combinedMask = mergedImage.eq(2);
+var maskedImagefinal = finalimage.updateMask(combinedMask);
+
+//Export to Google Drive
+Export.image.toDrive({
+  image: maskedImagefinal,               
+  description: "dongbeifinal", 
+  folder: 'download_dongbeifinal',         
+  scale: 10,                     
+  crs: "EPSG:4326",               
+  region: roi,                    
+  maxPixels: 1e13,                 
+fileFormat: 'GeoTIFF'        
+});
