@@ -6,3 +6,5 @@ Here is a table introducing each file of the final project.
 | :------- | :------ | :------- |
 | 1     | GEDI_Request.py   | Make a job request through Harmony API.     |
 | 1 | GEDI_Download.py | Download GEDI h5 files. |
+| 1 | Sentinel2_12bands.txt | Javascript of GEE code editor for downloading Sentinel-2 12 bands. |
+|1 | Sentinel2_14bands.txt | Javascript of GEE code editor for downloading Sentinel-2 12 bands plus lat, lon in forested pixels .
