@@ -18,3 +18,6 @@ Here is a table introducing each file of the final project.
 |3| lightgbm.py| Train the Light GBM model using best parameters.|
 |3| MLP.ipynb| Train the MLP model.|
 |3| 1DCNN.ipynb| Train the 1DCNN model.|
+|4| Confusion_plot.ipynb| Draw the confusion plot using MLP as an example.|
+|4| Feature_importance.ipynb| Calculate and plot the feature importance of Random Foest model.|
+|4| map_predict.py| Generate AGB map by Random Forest model.|
