@@ -13,3 +13,8 @@ Here is a table introducing each file of the final project.
 |2| Footprint_Band_Match.py | Match the footprints with Sentinel-2 band values.|
 |2| CSV_Merge.py | Merge all the samples and filter the outlines.|
 |2| dataset_download_link.md | Download the dataset after filtration.|
+|3| rdmfr.py| Train the Random Forest model.|
+|3| lgbmsearch.py| Search parameters of Light GBM model.|
+|3| lightgbm.py| Train the Light GBM model using best parameters.|
+|3| MLP.ipynb| Train the MLP model.|
+|3| 1DCNN.ipynb| Train the 1DCNN model.|
