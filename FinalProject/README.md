@@ -21,3 +21,8 @@ Here is a table introducing each file of the final project.
 |4| Confusion_plot.ipynb| Draw the confusion plot using MLP as an example.|
 |4| Feature_importance.ipynb| Calculate and plot the feature importance of Random Foest model.|
 |4| map_predict.py| Generate AGB map by Random Forest model.|
+|5| ChongguangFAN_Final_Report_v1.pdf| Preliminary report.|
+|5| ChongguangFAN_Final_Report_v2.pdf| Final report.|
+|5| Midpre_Fan.pptx| Midterm presentation slide.|
+|5| Finalpre_Fan.pptx| Final presentation slide.|
+|5| Group_metting_pre.pdf| More examples relating to this project.|
