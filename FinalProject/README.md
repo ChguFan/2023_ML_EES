@@ -7,4 +7,9 @@ Here is a table introducing each file of the final project.
 | 1     | GEDI_Request.py   | Make a job request through Harmony API.     |
 | 1 | GEDI_Download.py | Download GEDI h5 files. |
 | 1 | Sentinel2_12bands.txt | Javascript of GEE code editor for downloading Sentinel-2 12 bands. |
-|1 | Sentinel2_14bands.txt | Javascript of GEE code editor for downloading Sentinel-2 12 bands plus lat, lon in forested pixels .
+|1 | Sentinel2_14bands.txt | Javascript of GEE code editor for downloading Sentinel-2 12 bands plus lat, lon in forested pixels .|
+|2| GEDI_Quality_Filtration.py | Filter the footprints of low quality.|
+|2| GEDI_Forest_Filtration.py | Filter the footprints in non-forested areas.|
+|2| Footprint_Band_Match.py | Match the footprints with Sentinel-2 band values.|
+|2| CSV_Merge.py | Merge all the samples and filter the outlines.|
+|2| dataset_download_link.md | Download the dataset after filtration.|
